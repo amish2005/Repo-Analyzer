@@ -6,6 +6,7 @@ import { FileCode2, Code, Copy, Check, MessageSquarePlus } from "lucide-react";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { useChatContext } from "@/context/ChatContext";
+import { API_BASE } from "@/utils/api";
 
 export default function CodebasePage() {
   const searchParams = useSearchParams();
@@ -42,7 +43,7 @@ export default function CodebasePage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`http://localhost:8000/api/project/${projectId}/file?path=${encodeURIComponent(file)}`);
+        const res = await fetch(`${API_BASE}/project/${projectId}/file?path=${encodeURIComponent(file)}`);
         if (!res.ok) {
           throw new Error("Failed to fetch file content");
         }

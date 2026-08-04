@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { GitBranch, Upload, Code2, ArrowRight, Search, Settings, LogOut, Box, PanelLeftClose, PanelLeftOpen, Trash2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
-import { analyzeRepo } from "@/utils/api";
+import { analyzeRepo, API_BASE } from "@/utils/api";
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
@@ -54,7 +54,7 @@ export default function Home() {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
       if (data.user) {
-        fetch(`http://localhost:8000/api/user/${data.user.id}/projects`)
+        fetch(`${API_BASE}/user/${data.user.id}/projects`)
           .then(res => res.json())
           .then(json => {
             if (json.projects) {
@@ -109,7 +109,7 @@ export default function Home() {
   const confirmDelete = async () => {
     if (!projectToDelete) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/project/${projectToDelete}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE}/project/${projectToDelete}`, { method: 'DELETE' });
       if (res.ok) {
         setUserProjects(prev => prev.filter(p => p.id !== projectToDelete));
       } else {

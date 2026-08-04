@@ -6,6 +6,7 @@ import { ReactFlow, Controls, Background, useNodesState, useEdgesState, Handle, 
 import '@xyflow/react/dist/style.css';
 import { Database, Key, Hash, TableProperties, Maximize, Minimize, ZoomIn, ZoomOut } from "lucide-react";
 import { useChatContext } from "@/context/ChatContext";
+import { API_BASE } from "@/utils/api";
 
 function TopRightControls({ isFullscreen, setIsFullscreen }: { isFullscreen: boolean, setIsFullscreen: (val: boolean) => void }) {
   const { zoomIn, zoomOut } = useReactFlow();
@@ -94,7 +95,7 @@ export default function DatabasePage() {
     let isMounted = true;
     const fetchProject = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const response = await fetch(`${API_BASE}/project/${projectId}`);
         if (!response.ok) throw new Error(`HTTP error!`);
         const data = await response.json();
         

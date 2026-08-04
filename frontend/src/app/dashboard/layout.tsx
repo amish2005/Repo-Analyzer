@@ -8,6 +8,7 @@ import { chatWithAI } from "@/utils/api";
 import { ChatContext, ChatContextItem } from "@/context/ChatContext";
 import ReactMarkdown from 'react-markdown';
 import { 
+import { API_BASE } from "@/utils/api";
   Code2, 
   LayoutDashboard, 
   Network, 
@@ -60,7 +61,7 @@ const TreeNode = ({ name, node, path, currentFile, projectId, onAddContext }: an
     
     setIsLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/project/${projectId}/file?path=${encodeURIComponent(fullPath)}`);
+      const res = await fetch(`${API_BASE}/project/${projectId}/file?path=${encodeURIComponent(fullPath)}`);
       if (res.ok) {
         const data = await res.json();
         onAddContext({ id: fullPath, title: name, content: data.content });
@@ -152,7 +153,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     let isMounted = true;
     const fetchFileTree = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}/filetree`);
+        const response = await fetch(`${API_BASE}/project/${projectId}/filetree`);
         if (response.ok) {
           const data = await response.json();
           if (isMounted) setFilePaths(data.files || []);
@@ -164,7 +165,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     const fetchProject = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const response = await fetch(`${API_BASE}/project/${projectId}`);
         if (response.ok) {
           const data = await response.json();
           if (isMounted) setProject(data);
@@ -183,7 +184,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     const fetchChatHistory = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/chat/${projectId}`);
+        const response = await fetch(`${API_BASE}/chat/${projectId}`);
         if (response.ok) {
           const data = await response.json();
           if (isMounted && data.messages && data.messages.length > 0) {
@@ -234,7 +235,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setIsChatLoading(true);
     
     try {
-      const response = await fetch(`http://localhost:8000/api/chat`, {
+      const response = await fetch(`${API_BASE}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id: projectId, message: userMsg }),

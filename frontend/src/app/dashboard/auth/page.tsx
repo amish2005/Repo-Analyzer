@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { User, Server, Database, KeyRound, ShieldCheck, Lock, Activity, Shield } from "lucide-react";
 import { useChatContext } from "@/context/ChatContext";
+import { API_BASE } from "@/utils/api";
 
 const IconMap: any = {
   user: User,
@@ -48,7 +49,7 @@ export default function AuthFlowPage() {
     let isMounted = true;
     const fetchProject = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const response = await fetch(`${API_BASE}/project/${projectId}`);
         if (!response.ok) throw new Error(`HTTP error!`);
         const data = await response.json();
         

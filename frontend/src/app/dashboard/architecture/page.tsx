@@ -6,6 +6,7 @@ import { useChatContext } from "@/context/ChatContext";
 import { ReactFlow, Controls, Background, useNodesState, useEdgesState, Handle, Position, MarkerType, useReactFlow, Panel } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Server, Database, Globe, Lock, CreditCard, Folder, ChevronRight, Sparkles, Cpu, Shield, Maximize, Minimize, ZoomIn, ZoomOut } from "lucide-react";
+import { API_BASE } from "@/utils/api";
 
 const IconMap: any = {
   globe: Globe,
@@ -92,7 +93,7 @@ export default function ArchitecturePage() {
     let isMounted = true;
     const fetchProject = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const response = await fetch(`${API_BASE}/project/${projectId}`);
         if (!response.ok) throw new Error(`HTTP error!`);
         const data = await response.json();
         

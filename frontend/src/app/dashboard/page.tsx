@@ -6,6 +6,7 @@ import { createClient } from "@/utils/supabase/client";
 import { ExternalLink, GitBranch, MapPin, Users, Star, GitFork, Terminal, Copy, HelpCircle, Layers, Lightbulb, Check, Blocks, CreditCard, Mail, User, Database, History } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useChatContext } from "@/context/ChatContext";
+import { API_BASE } from "@/utils/api";
 
 function CopyButton({ textToCopy }: { textToCopy: string }) {
   const [copied, setCopied] = useState(false);
@@ -138,7 +139,7 @@ export default function DashboardOverview() {
     
     const fetchProject = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/project/${projectId}`);
+        const response = await fetch(`${API_BASE}/project/${projectId}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         
