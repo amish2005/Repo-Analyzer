@@ -7,8 +7,8 @@ import { createClient } from "@/utils/supabase/client";
 import { chatWithAI } from "@/utils/api";
 import { ChatContext, ChatContextItem } from "@/context/ChatContext";
 import ReactMarkdown from 'react-markdown';
-import { 
 import { API_BASE } from "@/utils/api";
+import { 
   Code2, 
   LayoutDashboard, 
   Network, 

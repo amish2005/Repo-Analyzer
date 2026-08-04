@@ -84,8 +84,8 @@ export default function DatabasePage() {
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
 
   const nodeTypes = useMemo(() => ({ table: DatabaseTableNode }), []);
 
