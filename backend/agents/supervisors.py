@@ -97,6 +97,8 @@ def overview_supervisor(state: CodebaseState):
     structured_llm = llm.with_structured_output(OverviewOutput)
     res = invoke_structured_llm_with_retry(prompt.format(repo_url=repo_url, purpose=purpose, tech_stack=tech_stack, integrations=integrations, env_files_content=env_files_content, readme=readme_content[:10000]), structured_llm)
     
+    if res is None:
+        return {"tab_reports": {"overview": {"what_it_does": "Error generating overview.", "how_it_does_that": "", "tech_stack_tags": [], "integrations": [], "quick_start": [], "live_link": ""}}}
     return {"tab_reports": {"overview": res.dict()}}
 
 def architecture_supervisor(state: CodebaseState):
@@ -115,6 +117,8 @@ def architecture_supervisor(state: CodebaseState):
     structured_llm = llm.with_structured_output(ArchitectureOutput)
     res = invoke_structured_llm_with_retry(prompt.format(architecture=architecture, file_tree=str(file_tree)[:15000]), structured_llm)
     
+    if res is None:
+        return {"tab_reports": {"architecture": {"nodes": [], "edges": [], "details": {}, "folder_tree_analysis": []}}}
     return {"tab_reports": {"architecture": res.dict()}}
 
 def database_supervisor(state: CodebaseState):
@@ -130,6 +134,8 @@ def database_supervisor(state: CodebaseState):
     structured_llm = llm.with_structured_output(DatabaseOutput)
     res = invoke_structured_llm_with_retry(prompt.format(database_schema=database_schema), structured_llm)
     
+    if res is None:
+        return {"tab_reports": {"database": {"databases": [], "relations": []}}}
     return {"tab_reports": {"database": res.dict()}}
 
 def auth_supervisor(state: CodebaseState):
@@ -145,6 +151,8 @@ def auth_supervisor(state: CodebaseState):
     structured_llm = llm.with_structured_output(AuthOutput)
     res = invoke_structured_llm_with_retry(prompt.format(auth_flow=auth_flow), structured_llm)
     
+    if res is None:
+        return {"tab_reports": {"auth": {"steps": [], "insights": []}}}
     return {"tab_reports": {"auth": res.dict()}}
 
 def dependency_supervisor(state: CodebaseState):
@@ -161,6 +169,8 @@ def dependency_supervisor(state: CodebaseState):
     structured_llm = llm.with_structured_output(DependencyOutput)
     res = invoke_structured_llm_with_retry(prompt.format(dependency_audit=dependency_audit), structured_llm)
     
+    if res is None:
+        return {"tab_reports": {"dependencies": {"dependencies": [], "agentic_analysis_message": "Error analyzing dependencies."}}}
     return {"tab_reports": {"dependencies": res.dict()}}
 
 def master_supervisor(state: CodebaseState):
