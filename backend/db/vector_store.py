@@ -15,12 +15,8 @@ if SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY:
 else:
     supabase = None
 
-# Using FastEmbed for local ONNX embeddings
-# We force threads=1 to absolutely guarantee it fits into Render's 512MB memory limit
-embeddings = FastEmbedEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2",
-    threads=1
-)
+# We instantiate embeddings locally strictly inside the processing loop 
+# to aggressively manage memory footprint on Render.
 
 def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200) -> list[str]:
     chunks = []
@@ -46,6 +42,8 @@ def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200) -> list[st
     if current_chunk:
         chunks.append('\n'.join(current_chunk))
     return chunks
+
+import gc
 
 def store_code_chunks(project_id: str, chunks: list[dict]):
     """
@@ -78,7 +76,7 @@ def store_code_chunks(project_id: str, chunks: list[dict]):
             
     texts = [d["content"] for d in split_docs]
     print(f"Prepared {len(texts)} semantic segments (including full files) for embedding.")
-    print("Starting local vector embedding process with FastEmbed (threads=1 to guarantee no OOM)...", flush=True)
+    print("Starting local vector embedding process with strict memory cleanup...", flush=True)
     
     # Generate embeddings locally in small batches to prevent OOM on Render
     vectors = []
@@ -87,8 +85,18 @@ def store_code_chunks(project_id: str, chunks: list[dict]):
     for i in range(0, len(texts), batch_size):
         batch_texts = texts[i:i + batch_size]
         print(f"Embedding batch {i // batch_size + 1} of {total_batches}...", flush=True)
-        batch_vectors = embeddings.embed_documents(batch_texts)
+        
+        # Instantiate inside the loop so ONNX memory is completely freed between batches
+        temp_embeddings = FastEmbedEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            threads=1
+        )
+        batch_vectors = temp_embeddings.embed_documents(batch_texts)
         vectors.extend(batch_vectors)
+        
+        # Force strict garbage collection
+        del temp_embeddings
+        gc.collect()
     
     records = []
     for i, doc in enumerate(split_docs):
