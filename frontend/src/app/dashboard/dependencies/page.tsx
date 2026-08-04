@@ -6,7 +6,7 @@ import { Package, CheckCircle2, AlertTriangle, Info, ShieldAlert } from "lucide-
 import { useChatContext } from "@/context/ChatContext";
 import { API_BASE } from "@/utils/api";
 
-export default function DependenciesPage() {
+function DependenciesPageContent() {
   const searchParams = useSearchParams();
   const projectId = searchParams.get("project_id");
   const { addContext, openChat } = useChatContext();
@@ -180,5 +180,16 @@ export default function DependenciesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+
+import { Suspense } from "react";
+
+export default function DependenciesPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen bg-black text-zinc-500">Loading...</div>}>
+      <DependenciesPageContent />
+    </Suspense>
   );
 }

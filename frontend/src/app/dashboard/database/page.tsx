@@ -77,7 +77,7 @@ const TABLE_COLORS = [
   'text-amber-500', 'text-purple-500', 'text-cyan-500'
 ];
 
-export default function DatabasePage() {
+function DatabasePageContent() {
   const searchParams = useSearchParams();
   const projectId = searchParams.get("project_id");
   const { addContext, openChat } = useChatContext();
@@ -292,5 +292,16 @@ export default function DatabasePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+
+import { Suspense } from "react";
+
+export default function DatabasePage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen bg-black text-zinc-500">Loading...</div>}>
+      <DatabasePageContent />
+    </Suspense>
   );
 }

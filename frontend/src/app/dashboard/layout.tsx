@@ -115,7 +115,7 @@ const TreeNode = ({ name, node, path, currentFile, projectId, onAddContext }: an
   );
 };
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const projectId = searchParams.get('project_id');
@@ -567,5 +567,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         )}
       </div>
     </div>
+  );
+}
+
+
+import { Suspense } from "react";
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen bg-black text-zinc-500">Loading...</div>}>
+      <DashboardLayoutContent children={children} />
+    </Suspense>
   );
 }

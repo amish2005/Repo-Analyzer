@@ -8,7 +8,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { useChatContext } from "@/context/ChatContext";
 import { API_BASE } from "@/utils/api";
 
-export default function CodebasePage() {
+function CodebasePageContent() {
   const searchParams = useSearchParams();
   const projectId = searchParams.get("project_id");
   const file = searchParams.get("file");
@@ -150,5 +150,16 @@ export default function CodebasePage() {
         )}
       </div>
     </div>
+  );
+}
+
+
+import { Suspense } from "react";
+
+export default function CodebasePage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen bg-black text-zinc-500">Loading...</div>}>
+      <CodebasePageContent />
+    </Suspense>
   );
 }

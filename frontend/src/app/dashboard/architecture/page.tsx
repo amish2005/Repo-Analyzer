@@ -73,7 +73,7 @@ function ArchNode({ data }: any) {
 }
 
 
-export default function ArchitecturePage() {
+function ArchitecturePageContent() {
   const searchParams = useSearchParams();
   const projectId = searchParams.get("project_id");
   const { addContext, openChat } = useChatContext();
@@ -319,5 +319,16 @@ export default function ArchitecturePage() {
         </div>
       )}
     </div>
+  );
+}
+
+
+import { Suspense } from "react";
+
+export default function ArchitecturePage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen bg-black text-zinc-500">Loading...</div>}>
+      <ArchitecturePageContent />
+    </Suspense>
   );
 }

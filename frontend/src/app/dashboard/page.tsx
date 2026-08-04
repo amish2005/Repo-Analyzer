@@ -80,7 +80,7 @@ const HighlightedCommand = ({ text }: { text: string }) => {
   );
 };
 
-export default function DashboardOverview() {
+function DashboardOverviewContent() {
   const searchParams = useSearchParams();
   const projectId = searchParams.get("project_id");
   const { addContext, openChat } = useChatContext();
@@ -434,5 +434,16 @@ export default function DashboardOverview() {
         {renderOverview()}
       </div>
     </div>
+  );
+}
+
+
+import { Suspense } from "react";
+
+export default function DashboardOverview() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen bg-black text-zinc-500">Loading...</div>}>
+      <DashboardOverviewContent />
+    </Suspense>
   );
 }

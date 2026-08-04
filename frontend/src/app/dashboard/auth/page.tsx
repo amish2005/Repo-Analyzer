@@ -36,7 +36,7 @@ function formatPoint(text: string) {
   });
 }
 
-export default function AuthFlowPage() {
+function AuthFlowPageContent() {
   const searchParams = useSearchParams();
   const projectId = searchParams.get("project_id");
   const { addContext, openChat } = useChatContext();
@@ -204,5 +204,16 @@ export default function AuthFlowPage() {
         </div>
       )}
     </div>
+  );
+}
+
+
+import { Suspense } from "react";
+
+export default function AuthFlowPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen bg-black text-zinc-500">Loading...</div>}>
+      <AuthFlowPageContent />
+    </Suspense>
   );
 }
