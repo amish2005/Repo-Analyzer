@@ -76,27 +76,23 @@ def store_code_chunks(project_id: str, chunks: list[dict]):
             
     texts = [d["content"] for d in split_docs]
     print(f"Prepared {len(texts)} semantic segments (including full files) for embedding.")
-    print("Starting local vector embedding process with strict memory cleanup...", flush=True)
+    print("Starting local vector embedding process with FastEmbed (threads=1 to guarantee no OOM)...", flush=True)
     
-    # Generate embeddings locally in small batches to prevent OOM on Render
+    # Instantiate ONCE outside the loop to prevent ONNX session memory leaks
+    embeddings = FastEmbedEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2",
+        threads=1
+    )
+    
+    # Generate embeddings locally in small batches to prevent large allocations
     vectors = []
-    batch_size = 50
+    batch_size = 100
     total_batches = (len(texts) + batch_size - 1) // batch_size
     for i in range(0, len(texts), batch_size):
         batch_texts = texts[i:i + batch_size]
         print(f"Embedding batch {i // batch_size + 1} of {total_batches}...", flush=True)
-        
-        # Instantiate inside the loop so ONNX memory is completely freed between batches
-        temp_embeddings = FastEmbedEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            threads=1
-        )
-        batch_vectors = temp_embeddings.embed_documents(batch_texts)
+        batch_vectors = embeddings.embed_documents(batch_texts)
         vectors.extend(batch_vectors)
-        
-        # Force strict garbage collection
-        del temp_embeddings
-        gc.collect()
     
     records = []
     for i, doc in enumerate(split_docs):
