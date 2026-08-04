@@ -8,4 +8,4 @@ langchain-google-genai
 supabase
 python-dotenv
 langchain-community
-
+fastembed
