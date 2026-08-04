@@ -1,7 +1,7 @@
 import os
 from supabase import create_client, Client
 from langchain_community.vectorstores import SupabaseVectorStore
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_core.documents import Document
 from dotenv import load_dotenv
 
@@ -15,7 +15,8 @@ if SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY:
 else:
     supabase = None
 
-embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+# Using Gemini embeddings (768 dimensions) to avoid HuggingFace PyTorch OOM on free tier hosts
+embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
 
 def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200) -> list[str]:
     chunks = []
