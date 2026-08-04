@@ -213,24 +213,24 @@ function DashboardOverviewContent() {
       );
     }
     const validTechStack = (docs.overview.tech_stack_tags || []).filter((t: any) => {
-      if (typeof t !== "string") return false;
-      const lower = t.toLowerCase();
+      if (!t) return false;
+      const lower = String(t).toLowerCase();
       return lower !== "none" && lower !== "n/a" && lower !== "null" && lower !== "undefined" && lower !== "";
     });
 
     const validIntegrations = (docs.overview.integrations || []).filter((integration: any) => {
-      const name = (integration?.name || "").toLowerCase();
+      const name = String(integration?.name || "").toLowerCase();
       return name !== "" && name !== "none" && name !== "n/a" && name !== "null" && !name.includes("no external");
     });
 
     const validQuickStart = (docs.overview.quick_start || []).filter((step: any) => {
-      const title = (step?.title || "").toLowerCase();
-      const cmds = (step?.commands || "").toLowerCase();
+      const title = String(step?.title || "").toLowerCase();
+      const cmds = String(step?.commands || "").toLowerCase();
       return title !== "" && cmds !== "" && title !== "none" && cmds !== "none" && title !== "n/a" && !title.includes("no quick start");
     });
 
-    const hasWhatItDoes = typeof docs.overview.what_it_does === "string" && docs.overview.what_it_does.toLowerCase() !== "none";
-    const hasHowItDoesThat = typeof docs.overview.how_it_does_that === "string" && docs.overview.how_it_does_that.toLowerCase() !== "none";
+    const hasWhatItDoes = !!docs.overview.what_it_does && String(docs.overview.what_it_does).toLowerCase() !== "none";
+    const hasHowItDoesThat = !!docs.overview.how_it_does_that && String(docs.overview.how_it_does_that).toLowerCase() !== "none";
 
     // Structured format
     return (

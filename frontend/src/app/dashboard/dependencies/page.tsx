@@ -67,8 +67,8 @@ function DependenciesPageContent() {
 
   // Calculate metrics
   const totalPackages = docs.dependencies?.length || 0;
-  const outdatedCount = docs.dependencies?.filter((d: any) => (d?.status || "").toLowerCase() === 'outdated').length || 0;
-  const vulnerabilityCount = docs.dependencies?.filter((d: any) => (d?.status || "").toLowerCase() === 'vulnerable').length || 0;
+  const outdatedCount = docs.dependencies?.filter((d: any) => String(d?.status || "").toLowerCase() === 'outdated').length || 0;
+  const vulnerabilityCount = docs.dependencies?.filter((d: any) => String(d?.status || "").toLowerCase() === 'vulnerable').length || 0;
 
   // Helper to parse markdown-style inline code blocks in the message
   const formatMessage = (text: string) => {
@@ -141,11 +141,11 @@ function DependenciesPageContent() {
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  {(dep?.status || "").toLowerCase() === "up-to-date" ? (
+                  {String(dep?.status || "").toLowerCase() === "up-to-date" ? (
                     <div className="flex items-center gap-1.5 text-emerald-500 text-sm">
                       <CheckCircle2 className="w-4 h-4" /> Up to date
                     </div>
-                  ) : (dep?.status || "").toLowerCase() === "vulnerable" ? (
+                  ) : String(dep?.status || "").toLowerCase() === "vulnerable" ? (
                     <div className="flex items-center gap-1.5 text-red-500 text-sm">
                       <ShieldAlert className="w-4 h-4" /> Vulnerable
                     </div>

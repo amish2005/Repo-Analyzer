@@ -165,7 +165,7 @@ function DatabasePageContent() {
       });
 
       dbData.relations?.forEach((rel: any, rIndex: number) => {
-        const isCrossDB = rel.relation_type?.toLowerCase() === 'cross_db';
+        const isCrossDB = String(rel?.relation_type || "").toLowerCase() === 'cross_db';
         newEdges.push({
           id: `edge-${rIndex}`,
           source: rel.source_table_id,
