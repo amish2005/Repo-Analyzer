@@ -28,14 +28,17 @@ class ChatRequest(BaseModel):
 def run_analysis_pipeline(project_id: str, github_url: str):
     # 1. Clone and Parse Repo
     try:
+        print(f"Cloning and parsing repository: {github_url}...", flush=True)
         repo_data = clone_and_parse_repo(github_url)
     except Exception as e:
-        print(f"Failed to clone repository: {e}")
+        print(f"Failed to clone repository: {e}", flush=True)
         supabase.table("projects").update({"status": "error"}).eq("id", project_id).execute()
         return
 
     # 2. Store vectors in Supabase
+    print(f"Storing {len(repo_data['code_chunks'])} code chunks into Supabase vector store...", flush=True)
     store_code_chunks(project_id, repo_data["code_chunks"])
+    print(f"Successfully stored vectors. Starting LangGraph Multi-Agent pipeline...", flush=True)
     
     # 3. Run LangGraph Multi-Agent pipeline
     initial_state = CodebaseState(
@@ -54,7 +57,7 @@ def run_analysis_pipeline(project_id: str, github_url: str):
 
         for event in repo_macro_agent_app.stream(current_state):
             for key, value in event.items():
-                print(f"Node '{key}' completed.")
+                print(f"Node '{key}' completed.", flush=True)
                 # Merge state
                 if "agent_outputs" in value:
                     current_state["agent_outputs"].update(value["agent_outputs"])
@@ -76,7 +79,7 @@ def run_analysis_pipeline(project_id: str, github_url: str):
                     supabase.table("projects").update({
                         "final_documentation": partial_docs
                     }).eq("id", project_id).execute()
-                    print(f"Pushed partial documentation after {key} to Supabase for {project_id}")
+                    print(f"Pushed partial documentation after {key} to Supabase for {project_id}", flush=True)
         
         # Construct final documentation object
         final_docs = {
