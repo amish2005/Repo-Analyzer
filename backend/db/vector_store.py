@@ -16,7 +16,7 @@ else:
     supabase = None
 
 # Using Gemini embeddings (768 dimensions) because Render's 512MB limit is too small for ANY local AI model.
-embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
 def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200) -> list[str]:
     chunks = []
