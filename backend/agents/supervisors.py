@@ -13,106 +13,32 @@ from pydantic import BaseModel, Field
 
 llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", temperature=0, google_api_key=os.environ.get("GEMINI_API_KEY"))
 
-class QuickStartItem(BaseModel):
-    title: str = Field(description="Title of the step (e.g. '1. INITIAL SETUP' or 'TERMINAL 1 (BACKEND APIS)')")
-    commands: str = Field(description="The terminal commands for this step (multi-line string)")
 
-class IntegrationItem(BaseModel):
-    name: str = Field(description="Name of the integration (e.g. 'Stripe API')")
-    description: str = Field(description="Short description (e.g. 'Payments & Billing')")
 
 class OverviewOutput(BaseModel):
     what_it_does: str = Field(description="Detailed explanation of what the project does")
     how_it_does_that: str = Field(description="Detailed explanation of how the project achieves its goals")
     tech_stack_tags: List[str] = Field(description="List of core tech stack technologies")
-    integrations: List[IntegrationItem] = Field(description="List of external integrations and services")
-    quick_start: List[QuickStartItem] = Field(description="List of quick start setup steps")
+    integrations: List[dict] = Field(description="List of external integrations and services. Each dict must have 'name' and 'description' keys.")
+    quick_start: List[dict] = Field(description="List of quick start setup steps. Each dict must have 'title' and 'commands' keys.")
     live_link: str = Field(description="The live deployed URL of the project if found in the README or codebase, else an empty string")
 
-class ArchitectureNode(BaseModel):
-    id: str = Field(description="Unique ID for the node, e.g. 'react-frontend'")
-    name: str = Field(description="Display name of the component, e.g. 'Next.js Frontend'")
-    description: str = Field(description="Brief sub-label, e.g. 'Client UI / SSR'")
-    icon: str = Field(description="Icon slug (choose one: 'globe', 'server', 'database', 'lock', 'credit-card', 'cpu', 'shield')")
-
-class ArchitectureEdge(BaseModel):
-    source: str = Field(description="The ID of the source node")
-    target: str = Field(description="The ID of the target node")
-    label: str = Field(description="Brief label describing the connection, e.g. 'REST API Calls' or 'Reads/Writes'")
-    animated: bool = Field(description="True if the connection represents active data flow, false otherwise")
-
-class ArchitectureDetail(BaseModel):
-    title: str = Field(description="Title of the architecture component")
-    description: str = Field(description="Detailed explanation of the component")
-    technologies: List[str] = Field(description="List of technologies used (e.g. Next.js, React, TailwindCSS)")
-
-class ArchitectureDetails(BaseModel):
-    frontend: Optional[ArchitectureDetail] = Field(None, description="Frontend architecture details (Client-side, UI, etc.)")
-    backend: Optional[ArchitectureDetail] = Field(None, description="Backend architecture details (API, Server-side logic, etc.)")
-    database: Optional[ArchitectureDetail] = Field(None, description="Database and caching layer details")
-    infrastructure: Optional[ArchitectureDetail] = Field(None, description="Infrastructure, Deployment, or DevOps details")
-
-class FolderAnalysis(BaseModel):
-    folder_path: str = Field(description="The path of the folder, e.g. /src/services")
-    description: str = Field(description="Detailed explanation of what this folder is responsible for")
-    why_it_is_useful: str = Field(description="Why this specific folder structure/pattern is useful for developers")
-
 class ArchitectureOutput(BaseModel):
-    nodes: List[ArchitectureNode]
-    edges: List[ArchitectureEdge]
-    details: ArchitectureDetails
-    folder_tree_analysis: List[FolderAnalysis]
-
-class DatabaseField(BaseModel):
-    name: str = Field(description="Name of the field (e.g. 'id', 'email')")
-    type: str = Field(description="Data type (e.g. 'UUID', 'VARCHAR', 'TIMESTAMP')")
-    isPrimaryKey: bool = Field(description="True if this field is a primary key")
-    isForeignKey: bool = Field(description="True if this field is a foreign key")
-
-class DatabaseTable(BaseModel):
-    id: str = Field(description="Unique string ID for the table (e.g. 'users_table')")
-    label: str = Field(description="Display name for the table (e.g. 'users')")
-    description: str = Field(description="Detailed explanation of what this table stores")
-    fields: List[DatabaseField]
-
-class DatabaseInstance(BaseModel):
-    id: str = Field(description="Unique string ID for the database (e.g. 'db-primary')")
-    name: str = Field(description="Name of the database (e.g. 'Primary DB: PostgreSQL')")
-    description: str = Field(description="Description of this database's purpose")
-    tables: List[DatabaseTable]
-
-class DatabaseRelation(BaseModel):
-    source_table_id: str = Field(description="The ID of the table containing the foreign key")
-    target_table_id: str = Field(description="The ID of the table being referenced")
-    relation_type: str = Field(description="Type of relation, e.g. 'foreign_key' or 'cross_db'")
+    nodes: List[dict] = Field(description="List of system components. Each dict must have 'id', 'name', 'description', and 'icon' keys.")
+    edges: List[dict] = Field(description="List of connections between components. Each dict must have 'source', 'target', 'label', and 'animated' keys.")
+    details: dict = Field(description="Dictionary with 'frontend', 'backend', 'database', 'infrastructure' keys mapping to dicts with 'title', 'description', and 'technologies' keys. Use null for missing categories.")
+    folder_tree_analysis: List[dict] = Field(description="Key folders and their purpose. Each dict must have 'folder_path' and 'description' keys.")
 
 class DatabaseOutput(BaseModel):
-    databases: List[DatabaseInstance]
-    relations: List[DatabaseRelation]
-
-class AuthStep(BaseModel):
-    title: str = Field(description="Professional authorization-related heading (e.g. '1. Client Payload & Encryption')")
-    description: str = Field(description="Detailed explanation paragraph for this step")
-    points: List[str] = Field(description="List of highly detailed points for this step")
-    icon: str = Field(description="Icon slug (choose from: 'user', 'server', 'database', 'key', 'shield', 'lock', 'activity')")
-
-class SecurityInsight(BaseModel):
-    title: str = Field(description="Insight title (e.g. 'Defense against XSS')")
-    description: str = Field(description="Detailed explanation of the security measure")
-    icon: str = Field(description="Icon slug (choose from: 'lock', 'activity', 'shield')")
+    databases: List[dict] = Field(description="List of databases. Each dict must have 'id', 'name', 'description', and 'tables' keys. 'tables' is a list of dicts with 'id', 'label', 'description', and 'fields' keys. 'fields' is a list of dicts with 'name', 'type', 'isPrimaryKey', 'isForeignKey' keys.")
+    relations: List[dict] = Field(description="List of relations. Each dict must have 'source_table_id', 'target_table_id', 'relation_type' keys.")
 
 class AuthOutput(BaseModel):
-    steps: List[AuthStep]
-    insights: List[SecurityInsight]
-
-class DependencyItem(BaseModel):
-    name: str
-    version: str
-    category: str = Field(description="Category of the dependency, e.g., Core, Styling, Backend, Database, AI, Utility")
-    status: str = Field(description="One of: 'up-to-date', 'outdated', 'vulnerable'")
+    steps: List[dict] = Field(description="List of auth steps. Each dict must have 'title', 'description', 'points' (List[str]), and 'icon' keys.")
+    insights: List[dict] = Field(description="List of security insights. Each dict must have 'title', 'description', and 'icon' keys.")
 
 class DependencyOutput(BaseModel):
-    dependencies: List[DependencyItem]
+    dependencies: List[dict] = Field(description="List of dependencies. Each dict must have 'name', 'version', 'category', and 'status' keys.")
     agentic_analysis_message: str = Field(description="A brief security or performance insight about one of the dependencies.")
 
 
