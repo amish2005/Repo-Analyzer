@@ -180,7 +180,7 @@ function DashboardOverviewContent() {
     );
   }
 
-  const repoName = project?.repo_url.replace("https://github.com/", "") || "example/repo";
+  const repoName = (project?.repo_url || "").replace("https://github.com/", "") || "example/repo";
   const docs = project?.final_documentation || {};
 
   // Helper to safely extract string from LangChain AIMessage content formats
@@ -212,7 +212,8 @@ function DashboardOverviewContent() {
         </div>
       );
     }
-    const validTechStack = (docs.overview.tech_stack_tags || []).filter((t: string) => {
+    const validTechStack = (docs.overview.tech_stack_tags || []).filter((t: any) => {
+      if (typeof t !== "string") return false;
       const lower = t.toLowerCase();
       return lower !== "none" && lower !== "n/a" && lower !== "null" && lower !== "undefined" && lower !== "";
     });
@@ -228,8 +229,8 @@ function DashboardOverviewContent() {
       return title !== "" && cmds !== "" && title !== "none" && cmds !== "none" && title !== "n/a" && !title.includes("no quick start");
     });
 
-    const hasWhatItDoes = docs.overview.what_it_does && docs.overview.what_it_does.toLowerCase() !== "none";
-    const hasHowItDoesThat = docs.overview.how_it_does_that && docs.overview.how_it_does_that.toLowerCase() !== "none";
+    const hasWhatItDoes = typeof docs.overview.what_it_does === "string" && docs.overview.what_it_does.toLowerCase() !== "none";
+    const hasHowItDoesThat = typeof docs.overview.how_it_does_that === "string" && docs.overview.how_it_does_that.toLowerCase() !== "none";
 
     // Structured format
     return (
@@ -412,7 +413,7 @@ function DashboardOverviewContent() {
                 </div>
                 
                 <div className="flex gap-2 shrink-0">
-                  {docs.overview?.live_link && docs.overview.live_link.trim() !== "" && docs.overview.live_link.toLowerCase() !== "none" && (
+                  {typeof docs.overview?.live_link === "string" && docs.overview.live_link.trim() !== "" && docs.overview.live_link.toLowerCase() !== "none" && (
                     <a href={!docs.overview.live_link.startsWith('http') ? `https://${docs.overview.live_link}` : docs.overview.live_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 border border-indigo-400 text-white px-3 py-1.5 rounded-md text-xs transition-colors font-medium">
                       <ExternalLink className="w-3 h-3" />
                       Live Demo

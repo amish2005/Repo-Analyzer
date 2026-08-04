@@ -201,11 +201,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     return () => { isMounted = false; };
   }, [projectId]);
 
-  useEffect(() => {
-    if (!projectId) {
-      router.push("/");
-    }
-  }, [projectId, router]);
+  // Removed aggressive redirect to prevent kicking users out on hard refresh
 
   if (!projectId) {
     return null;
