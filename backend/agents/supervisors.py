@@ -13,11 +13,11 @@ from pydantic import BaseModel, Field
 
 llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", temperature=0, google_api_key=os.environ.get("GEMINI_API_KEY"))
 
-class QuickStartBlock(BaseModel):
+class QuickStartItem(BaseModel):
     title: str = Field(description="Title of the step (e.g. '1. INITIAL SETUP' or 'TERMINAL 1 (BACKEND APIS)')")
     commands: str = Field(description="The terminal commands for this step (multi-line string)")
 
-class Integration(BaseModel):
+class IntegrationItem(BaseModel):
     name: str = Field(description="Name of the integration (e.g. 'Stripe API')")
     description: str = Field(description="Short description (e.g. 'Payments & Billing')")
 
@@ -25,8 +25,8 @@ class OverviewOutput(BaseModel):
     what_it_does: str = Field(description="Detailed explanation of what the project does")
     how_it_does_that: str = Field(description="Detailed explanation of how the project achieves its goals")
     tech_stack_tags: List[str] = Field(description="List of core tech stack technologies")
-    integrations: List[Integration] = Field(description="List of external integrations and services")
-    quick_start: List[QuickStartBlock] = Field(description="List of quick start setup steps")
+    integrations: List[IntegrationItem] = Field(description="List of external integrations and services")
+    quick_start: List[QuickStartItem] = Field(description="List of quick start setup steps")
     live_link: str = Field(description="The live deployed URL of the project if found in the README or codebase, else an empty string")
 
 class ArchitectureNode(BaseModel):
