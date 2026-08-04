@@ -218,14 +218,14 @@ function DashboardOverviewContent() {
     });
 
     const validIntegrations = (docs.overview.integrations || []).filter((integration: any) => {
-      const name = integration.name.toLowerCase();
-      return name !== "none" && name !== "n/a" && name !== "null" && !name.includes("no external");
+      const name = (integration?.name || "").toLowerCase();
+      return name !== "" && name !== "none" && name !== "n/a" && name !== "null" && !name.includes("no external");
     });
 
     const validQuickStart = (docs.overview.quick_start || []).filter((step: any) => {
-      const title = step.title.toLowerCase();
-      const cmds = step.commands.toLowerCase();
-      return title !== "none" && cmds !== "none" && title !== "n/a" && !title.includes("no quick start");
+      const title = (step?.title || "").toLowerCase();
+      const cmds = (step?.commands || "").toLowerCase();
+      return title !== "" && cmds !== "" && title !== "none" && cmds !== "none" && title !== "n/a" && !title.includes("no quick start");
     });
 
     const hasWhatItDoes = docs.overview.what_it_does && docs.overview.what_it_does.toLowerCase() !== "none";
