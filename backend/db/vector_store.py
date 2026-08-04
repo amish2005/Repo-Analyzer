@@ -1,7 +1,7 @@
 import os
 from supabase import create_client, Client
 from langchain_community.vectorstores import SupabaseVectorStore
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 from langchain_core.documents import Document
 from dotenv import load_dotenv
 
@@ -15,10 +15,11 @@ if SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY:
 else:
     supabase = None
 
-# Using Gemini embeddings (768 dimensions) because Render's 512MB limit is too small for ANY local AI model.
-embeddings = GoogleGenerativeAIEmbeddings(
-    model="models/embedding-001", 
-    google_api_key=os.environ.get("GEMINI_API_KEY")
+# Using FastEmbed for local ONNX embeddings
+# We force threads=1 to absolutely guarantee it fits into Render's 512MB memory limit
+embeddings = FastEmbedEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2",
+    threads=1
 )
 
 def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200) -> list[str]:
@@ -77,9 +78,9 @@ def store_code_chunks(project_id: str, chunks: list[dict]):
             
     texts = [d["content"] for d in split_docs]
     print(f"Prepared {len(texts)} semantic segments (including full files) for embedding.")
-    print("Starting vector embedding process with Google Gemini API (in batches to avoid rate limits)...", flush=True)
+    print("Starting local vector embedding process with FastEmbed (threads=1 to guarantee no OOM)...", flush=True)
     
-    # Generate embeddings via Google Gemini API in small batches to prevent OOM on Render
+    # Generate embeddings locally in small batches to prevent OOM on Render
     vectors = []
     batch_size = 50
     total_batches = (len(texts) + batch_size - 1) // batch_size
