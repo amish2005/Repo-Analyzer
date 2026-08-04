@@ -1,10 +1,10 @@
 fastapi
 uvicorn
 pydantic
-langchain
-langgraph
-langchain-core
+langchain<0.3.0
+langgraph<0.3.0
+langchain-core<0.3.0
 langchain-google-genai<2.0.0
+langchain-community<0.3.0
 supabase
 python-dotenv
-langchain-community
