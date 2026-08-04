@@ -75,10 +75,17 @@ def store_code_chunks(project_id: str, chunks: list[dict]):
             
     texts = [d["content"] for d in split_docs]
     print(f"Prepared {len(texts)} semantic segments (including full files) for embedding.")
-    print("Starting local vector embedding process with HuggingFace...")
+    print("Starting local vector embedding process with FastEmbed (in batches to save memory)...", flush=True)
     
-    # Generate embeddings locally
-    vectors = embeddings.embed_documents(texts)
+    # Generate embeddings locally in small batches to prevent OOM on Render
+    vectors = []
+    batch_size = 50
+    total_batches = (len(texts) + batch_size - 1) // batch_size
+    for i in range(0, len(texts), batch_size):
+        batch_texts = texts[i:i + batch_size]
+        print(f"Embedding batch {i // batch_size + 1} of {total_batches}...", flush=True)
+        batch_vectors = embeddings.embed_documents(batch_texts)
+        vectors.extend(batch_vectors)
     
     records = []
     for i, doc in enumerate(split_docs):
