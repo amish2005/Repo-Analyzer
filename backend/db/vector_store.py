@@ -84,15 +84,17 @@ def store_code_chunks(project_id: str, chunks: list[dict]):
         threads=1
     )
     
-    # Generate embeddings locally in small batches to prevent large allocations
+    # Generate embeddings locally in extremely small batches to prevent large tensor allocations
     vectors = []
-    batch_size = 100
+    batch_size = 10
     total_batches = (len(texts) + batch_size - 1) // batch_size
     for i in range(0, len(texts), batch_size):
         batch_texts = texts[i:i + batch_size]
         print(f"Embedding batch {i // batch_size + 1} of {total_batches}...", flush=True)
         batch_vectors = embeddings.embed_documents(batch_texts)
         vectors.extend(batch_vectors)
+        import gc
+        gc.collect()
     
     records = []
     for i, doc in enumerate(split_docs):
