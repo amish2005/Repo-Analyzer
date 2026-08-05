@@ -81,14 +81,14 @@ def overview_supervisor(state: CodebaseState):
             
     prompt = PromptTemplate.from_template(
         "You are the Overview Supervisor. Aggregate the following analysis and respond ONLY with a raw JSON object matching the exact structure below. Do not include markdown formatting.\n"
-        "{\n"
+        "{{\n"
         '  "what_it_does": "Detailed explanation of what the project does",\n'
         '  "how_it_does_that": "Detailed explanation of how the project achieves its goals",\n'
         '  "tech_stack_tags": ["react", "node", "etc"],\n'
-        '  "integrations": [{"name": "Stripe", "description": "Payment processing"}],\n'
-        '  "quick_start": [{"title": "1. INITIAL SETUP", "commands": "git clone..."}],\n'
+        '  "integrations": [{{"name": "Stripe", "description": "Payment processing"}}],\n'
+        '  "quick_start": [{{"title": "1. INITIAL SETUP", "commands": "git clone..."}}],\n'
         '  "live_link": "https://deployed-url.com"\n'
-        "}\n\n"
+        "}}\n\n"
         "INSTRUCTIONS:\n"
         "1. For 'what_it_does' and 'how_it_does_that', write highly detailed, professional paragraphs (3-4 sentences minimum) explaining the core features, value proposition, and underlying mechanics of the website.\n"
         "2. For 'tech_stack_tags', be accurate and relevant.\n"
@@ -110,17 +110,17 @@ def architecture_supervisor(state: CodebaseState):
     
     prompt = PromptTemplate.from_template(
         "You are the Architecture Supervisor. Compile the structural findings and file tree and respond ONLY with a raw JSON object matching the exact structure below. Do not include markdown formatting.\n"
-        "{\n"
-        '  "nodes": [{"id": "frontend", "name": "React SPA", "description": "UI Layer", "icon": "server"}],\n'
-        '  "edges": [{"source": "frontend", "target": "backend", "label": "HTTP API", "animated": true}],\n'
-        '  "details": {\n'
-        '    "frontend": {"title": "Frontend App", "description": "...", "technologies": ["React"]},\n'
-        '    "backend": {"title": "Backend API", "description": "...", "technologies": ["Node"]},\n'
-        '    "database": {"title": "Database", "description": "...", "technologies": ["PostgreSQL"]},\n'
-        '    "infrastructure": {"title": "Infra", "description": "...", "technologies": ["Docker"]}\n'
-        '  },\n'
-        '  "folder_tree_analysis": [{"folder_path": "src/components", "description": "UI components"}]\n'
-        "}\n\n"
+        "{{\n"
+        '  "nodes": [{{"id": "frontend", "name": "React SPA", "description": "UI Layer", "icon": "server"}}],\n'
+        '  "edges": [{{"source": "frontend", "target": "backend", "label": "HTTP API", "animated": true}}],\n'
+        '  "details": {{\n'
+        '    "frontend": {{"title": "Frontend App", "description": "...", "technologies": ["React"]}},\n'
+        '    "backend": {{"title": "Backend API", "description": "...", "technologies": ["Node"]}},\n'
+        '    "database": {{"title": "Database", "description": "...", "technologies": ["PostgreSQL"]}},\n'
+        '    "infrastructure": {{"title": "Infra", "description": "...", "technologies": ["Docker"]}}\n'
+        '  }},\n'
+        '  "folder_tree_analysis": [{{"folder_path": "src/components", "description": "UI components"}}]\n'
+        "}}\n\n"
         "INSTRUCTIONS:\n"
         "1. For 'nodes', define the core system components (e.g., React SPA, Express API, MongoDB). Do NOT invent components that do not exist. Even for simple monolithic projects, dissect the architecture into distinct conceptual components (like UI layer, Routing/Logic layer, Data/Storage layer).\n"
         "2. For 'edges', map the connections between these nodes based on how data flows. Ensure source and target exactly match the node IDs.\n"
@@ -141,17 +141,17 @@ def database_supervisor(state: CodebaseState):
     
     prompt = PromptTemplate.from_template(
         "You are the Database Supervisor. Convert the database analysis and respond ONLY with a raw JSON object matching the exact structure below. Do not include markdown formatting.\n"
-        "{\n"
+        "{{\n"
         '  "databases": [\n'
-        '    {\n'
+        '    {{\n'
         '      "id": "db1", "name": "Main DB", "description": "Primary storage",\n'
         '      "tables": [\n'
-        '        {"id": "users", "label": "Users Table", "description": "Stores user data", "fields": [{"name": "id", "type": "uuid", "isPrimaryKey": true, "isForeignKey": false}]}\n'
+        '        {{"id": "users", "label": "Users Table", "description": "Stores user data", "fields": [{{"name": "id", "type": "uuid", "isPrimaryKey": true, "isForeignKey": false}}]}}\n'
         '      ]\n'
-        '    }\n'
+        '    }}\n'
         '  ],\n'
-        '  "relations": [{"source_table_id": "posts", "target_table_id": "users", "relation_type": "foreign_key"}]\n'
-        "}\n\n"
+        '  "relations": [{{"source_table_id": "posts", "target_table_id": "users", "relation_type": "foreign_key"}}]\n'
+        "}}\n\n"
         "INSTRUCTIONS:\n"
         "1. For 'databases', group tables logically. Even if it's a single database, wrap it in a single DatabaseInstance. Provide detailed descriptions for tables.\n"
         "2. For 'relations', carefully map the foreign keys. Ensure 'source_table_id' and 'target_table_id' exactly match the 'id' fields of the tables you defined.\n\n"
@@ -170,10 +170,10 @@ def auth_supervisor(state: CodebaseState):
     
     prompt = PromptTemplate.from_template(
         "You are the Auth & Security Supervisor. Convert the raw authentication analysis and respond ONLY with a raw JSON object matching the exact structure below. Do not include markdown formatting.\n"
-        "{\n"
-        '  "steps": [{"title": "Login", "description": "User logs in", "points": ["Sends JWT", "Validates"], "icon": "lock"}],\n'
-        '  "insights": [{"title": "JWT Used", "description": "Stateless auth via JWT", "icon": "shield"}]\n'
-        "}\n\n"
+        "{{\n"
+        '  "steps": [{{"title": "Login", "description": "User logs in", "points": ["Sends JWT", "Validates"], "icon": "lock"}}],\n'
+        '  "insights": [{{"title": "JWT Used", "description": "Stateless auth via JWT", "icon": "shield"}}]\n'
+        "}}\n\n"
         "INSTRUCTIONS:\n"
         "1. For 'steps', extract the EXACT chronological steps of the authentication flow based on the findings. Do NOT force a specific number of steps; document what actually exists. Write professional headings, a detailed explanatory paragraph, and 2-3 specific bullet points for each step.\n"
         "2. For 'insights', extract exactly 2 critical Security Architecture Insights (like XSS mitigation, timing attack prevention, token security, etc.).\n\n"
@@ -192,10 +192,10 @@ def dependency_supervisor(state: CodebaseState):
     
     prompt = PromptTemplate.from_template(
         "You are the Dependency Supervisor. Convert the dependency analysis and respond ONLY with a raw JSON object matching the exact structure below. Do not include markdown formatting.\n"
-        "{\n"
-        '  "dependencies": [{"name": "react", "version": "18.2.0", "category": "frontend", "status": "up-to-date"}],\n'
+        "{{\n"
+        '  "dependencies": [{{"name": "react", "version": "18.2.0", "category": "frontend", "status": "up-to-date"}}],\n'
         '  "agentic_analysis_message": "Dependencies look secure and modern."\n'
-        "}\n\n"
+        "}}\n\n"
         "INSTRUCTIONS:\n"
         "1. For 'dependencies', map out all detected dependencies accurately.\n"
         "2. For 'agentic_analysis_message', provide a brief security or performance insight based on the overall dependencies.\n\n"
