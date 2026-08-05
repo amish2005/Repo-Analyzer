@@ -86,7 +86,7 @@ def store_code_chunks(project_id: str, chunks: list[dict]):
     # Use Google's incredibly fast Embedding API to offload CPU work
     # Updated to text-embedding-005
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/text-embedding-005", 
+        model="models/text-embedding-004", 
         google_api_key=os.environ.get("GEMINI_API_KEY")
     )
     
