@@ -82,11 +82,12 @@ def store_code_chunks(project_id: str, chunks: list[dict]):
     from langchain_google_genai import GoogleGenerativeAIEmbeddings
     import os
     from tenacity import retry, stop_after_attempt, wait_exponential
+    import numpy as np
     
     # Use Google's incredibly fast Embedding API to offload CPU work
-    # Updated to text-embedding-005
+    # Using the guaranteed stable embedding-001 model
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/text-embedding-004", 
+        model="models/embedding-001", 
         google_api_key=os.environ.get("GEMINI_API_KEY")
     )
     
@@ -102,9 +103,11 @@ def store_code_chunks(project_id: str, chunks: list[dict]):
         batch_texts = texts[i:i + batch_size]
         print(f"Embedding batch {i // batch_size + 1} of {total_batches}...", flush=True)
         batch_vectors = embed_with_retry(batch_texts)
-        # text-embedding-005 uses Matryoshka Representation, meaning we can simply slice the first 384 dimensions
-        # to remain perfectly compatible with our existing pgvector(384) Supabase schema!
-        vectors.extend([v[:384] for v in batch_vectors])
+        # embedding-001 requires manual normalization when truncating dimensions
+        for v in batch_vectors:
+            sliced = np.array(v[:384])
+            normed = sliced / np.linalg.norm(sliced)
+            vectors.append(normed.tolist())
     
     records = []
     for i, doc in enumerate(split_docs):
@@ -131,12 +134,16 @@ def search_code_chunks(query: str, project_id: str, limit: int = 5) -> str:
         
     try:
         from tenacity import retry, stop_after_attempt, wait_exponential
+        import numpy as np
+        
         @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=2, max=10))
         def embed_query_with_retry(q):
             return embeddings.embed_query(q)
             
-        # Generate embedding for the query and slice to 384d
-        query_vector = embed_query_with_retry(query)[:384]
+        # Generate embedding for the query and slice/normalize to 384d
+        raw_query_vector = embed_query_with_retry(query)
+        sliced_q = np.array(raw_query_vector[:384])
+        query_vector = (sliced_q / np.linalg.norm(sliced_q)).tolist()
         
         # Call the RPC function defined in supabase_alter_vector.sql
         res = supabase.rpc("match_code_chunks", {
