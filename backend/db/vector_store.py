@@ -91,13 +91,14 @@ def store_code_chunks(project_id: str, chunks: list[dict]):
         google_api_key=os.environ.get("GEMINI_API_KEY")
     )
     
-    @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=2, max=60))
+    @retry(stop=stop_after_attempt(10), wait=wait_exponential(multiplier=2, min=10, max=120))
     def embed_with_retry(texts_batch):
         return embeddings.embed_documents(texts_batch)
     
-    # Generate embeddings remotely in large batches
+    import time
+    # Generate embeddings remotely in paced batches to respect the 30K Tokens/Minute quota
     vectors = []
-    batch_size = 100 # Google API can handle much larger batches easily
+    batch_size = 20 # 20 chunks * ~250 tokens = ~5,000 tokens per batch
     total_batches = (len(texts) + batch_size - 1) // batch_size
     for i in range(0, len(texts), batch_size):
         batch_texts = texts[i:i + batch_size]
@@ -108,6 +109,10 @@ def store_code_chunks(project_id: str, chunks: list[dict]):
             sliced = np.array(v[:384])
             normed = sliced / np.linalg.norm(sliced)
             vectors.append(normed.tolist())
+        
+        # Pace the requests: 5,000 tokens every 12 seconds = 25,000 tokens/minute (Safely under 30K limit)
+        if i + batch_size < len(texts):
+            time.sleep(12)
     
     records = []
     for i, doc in enumerate(split_docs):
