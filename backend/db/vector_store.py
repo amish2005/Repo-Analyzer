@@ -1,7 +1,7 @@
 import os
 from supabase import create_client, Client
 from langchain_community.vectorstores import SupabaseVectorStore
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 from langchain_core.documents import Document
 from dotenv import load_dotenv
 
@@ -15,11 +15,8 @@ if SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY:
 else:
     supabase = None
 
-# Using Google's incredibly fast Embedding API to offload CPU work globally
-embeddings = GoogleGenerativeAIEmbeddings(
-    model="models/text-embedding-004", 
-    google_api_key=os.environ.get("GEMINI_API_KEY")
-)
+# We instantiate embeddings locally strictly inside the processing loop 
+# to aggressively manage memory footprint on Render.
 
 def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200) -> list[str]:
     chunks = []
@@ -50,7 +47,7 @@ import gc
 
 def store_code_chunks(project_id: str, chunks: list[dict]):
     """
-    Stores code chunks into Supabase pgvector by generating embeddings remotely.
+    Stores code chunks into Supabase pgvector by generating embeddings locally.
     """
     if not supabase:
         print("Supabase client not initialized")
@@ -79,40 +76,25 @@ def store_code_chunks(project_id: str, chunks: list[dict]):
             
     texts = [d["content"] for d in split_docs]
     print(f"Prepared {len(texts)} semantic segments (including full files) for embedding.")
-    from langchain_google_genai import GoogleGenerativeAIEmbeddings
-    import os
-    from tenacity import retry, stop_after_attempt, wait_exponential
-    import numpy as np
+    print("Starting local vector embedding process with FastEmbed (threads=1 to guarantee no OOM)...", flush=True)
     
-    # Use Google's incredibly fast Embedding API to offload CPU work
-    # Using the guaranteed stable embedding-001 model
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/gemini-embedding-2", 
-        google_api_key=os.environ.get("GEMINI_API_KEY")
+    # Instantiate ONCE outside the loop to prevent ONNX session memory leaks
+    embeddings = FastEmbedEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2",
+        threads=1
     )
     
-    @retry(stop=stop_after_attempt(10), wait=wait_exponential(multiplier=2, min=10, max=120))
-    def embed_with_retry(texts_batch):
-        return embeddings.embed_documents(texts_batch)
-    
-    import time
-    # Generate embeddings remotely in paced batches to respect the 30K Tokens/Minute quota
+    # Generate embeddings locally in extremely small batches to prevent large tensor allocations
     vectors = []
-    batch_size = 20 # 20 chunks * ~250 tokens = ~5,000 tokens per batch
+    batch_size = 10
     total_batches = (len(texts) + batch_size - 1) // batch_size
     for i in range(0, len(texts), batch_size):
         batch_texts = texts[i:i + batch_size]
         print(f"Embedding batch {i // batch_size + 1} of {total_batches}...", flush=True)
-        batch_vectors = embed_with_retry(batch_texts)
-        # embedding-001 requires manual normalization when truncating dimensions
-        for v in batch_vectors:
-            sliced = np.array(v[:384])
-            normed = sliced / np.linalg.norm(sliced)
-            vectors.append(normed.tolist())
-        
-        # Pace the requests: 5,000 tokens every 12 seconds = 25,000 tokens/minute (Safely under 30K limit)
-        if i + batch_size < len(texts):
-            time.sleep(12)
+        batch_vectors = embeddings.embed_documents(batch_texts)
+        vectors.extend(batch_vectors)
+        import gc
+        gc.collect()
     
     records = []
     for i, doc in enumerate(split_docs):
@@ -138,17 +120,13 @@ def search_code_chunks(query: str, project_id: str, limit: int = 5) -> str:
         return "Database connection unavailable."
         
     try:
-        from tenacity import retry, stop_after_attempt, wait_exponential
-        import numpy as np
-        
-        @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=2, max=10))
-        def embed_query_with_retry(q):
-            return embeddings.embed_query(q)
-            
-        # Generate embedding for the query and slice/normalize to 384d
-        raw_query_vector = embed_query_with_retry(query)
-        sliced_q = np.array(raw_query_vector[:384])
-        query_vector = (sliced_q / np.linalg.norm(sliced_q)).tolist()
+        from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
+        embeddings = FastEmbedEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            threads=1
+        )
+        # Generate embedding for the query
+        query_vector = embeddings.embed_query(query)
         
         # Call the RPC function defined in supabase_alter_vector.sql
         res = supabase.rpc("match_code_chunks", {
