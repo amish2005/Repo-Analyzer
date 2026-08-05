@@ -1,5 +1,7 @@
 # RepoScope AI
 
+**Live Demo:** [https://repo-analyzer-neon.vercel.app/](https://repo-analyzer-neon.vercel.app/)
+
 RepoScope AI is an advanced agentic coding tool that ingests your codebase, chunks and embeds it using a high-performance vector store, and provides an interactive AI assistant that can answer complex architectural and implementation questions with complete context.
 
 ## 🚀 Features
